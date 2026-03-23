@@ -2,22 +2,27 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from homeassistant.components.select import SelectEntity
-from homeconnect_websocket.entities import Execution
 
 from .entity import HCEntity
-from .helpers import create_entities, error_decorator
+from .helpers import create_entities
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.device_registry import DeviceInfo
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
+    from homeconnect_websocket import HomeAppliance
     from homeconnect_websocket.entities import SelectedProgram
 
-    from . import HCConfigEntry, HCData
+    from . import HCConfigEntry
     from .entity_descriptions.descriptions_definitions import HCSelectEntityDescription
+
 PARALLEL_UPDATES = 0
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -42,9 +47,10 @@ class HCSelect(HCEntity, SelectEntity):
     def __init__(
         self,
         entity_description: HCSelectEntityDescription,
-        runtime_data: HCData,
+        appliance: HomeAppliance,
+        device_info: DeviceInfo,
     ) -> None:
-        super().__init__(entity_description, runtime_data)
+        super().__init__(entity_description, appliance, device_info)
 
         self._rev_options = {}
         if entity_description.options:
@@ -73,11 +79,40 @@ class HCSelect(HCEntity, SelectEntity):
             return value
         return None
 
-    @error_decorator
     async def async_select_option(self, option: str) -> None:
-        if self._rev_options:
-            option = self._rev_options[option]
-        await self._entity.set_value(option)
+        if self._entity.name == "Cooking.Common.Option.Hood.VentingLevel":
+            program = self._appliance.programs.get("Cooking.Common.Program.Hood.Venting")
+            if program is not None:
+                raw_value: str | int | bool = option
+                if self._entity.enum:
+                    option_lower = option.lower()
+                    for enum_key, enum_value in self._entity.enum.items():
+                        if str(enum_value).lower() == option_lower:
+                            raw_value = enum_key
+                            break
+                try:
+                    await program.start({self._entity.uid: raw_value})
+                    return
+                except Exception:
+                    _LOGGER.debug(
+                        "Failed to set hood venting via program start, falling back to direct option write",
+                        exc_info=True,
+                    )
+
+        real_option = option
+        if self._rev_options and option in self._rev_options:
+            real_option = self._rev_options[option]
+        try:
+            await self._entity.set_value(real_option)
+        except Exception:
+            if not self._entity.enum:
+                raise
+            option_lower = option.lower()
+            for enum_key, enum_value in self._entity.enum.items():
+                if str(enum_value).lower() == option_lower:
+                    await self._entity.set_value(enum_key)
+                    return
+            raise
 
 
 class HCProgram(HCSelect):
@@ -88,9 +123,10 @@ class HCProgram(HCSelect):
     def __init__(
         self,
         entity_description: HCSelectEntityDescription,
-        runtime_data: HCData,
+        appliance: HomeAppliance,
+        device_info: DeviceInfo,
     ) -> None:
-        super().__init__(entity_description, runtime_data)
+        super().__init__(entity_description, appliance, device_info)
         self._programs = entity_description.mapping
         self._rev_programs = {value: key for key, value in self._programs.items()}
 
@@ -100,16 +136,11 @@ class HCProgram(HCSelect):
 
     @property
     def current_option(self) -> list[str] | None:
-        if self._runtime_data.appliance.selected_program:
-            if self._runtime_data.appliance.selected_program.name in self._programs:
-                return self._programs[self._runtime_data.appliance.selected_program.name]
-            return self._runtime_data.appliance.selected_program.name
+        if self._appliance.selected_program:
+            if self._appliance.selected_program.name in self._programs:
+                return self._programs[self._appliance.selected_program.name]
+            return self._appliance.selected_program.name
         return None
 
-    @error_decorator
     async def async_select_option(self, option: str) -> None:
-        selected_program = self._runtime_data.appliance.programs[self._rev_programs[option]]
-        if selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
-            await selected_program.select()
-        elif selected_program.execution == Execution.START_ONLY:
-            await selected_program.start()
+        await self._appliance.programs[self._rev_programs[option]].select()

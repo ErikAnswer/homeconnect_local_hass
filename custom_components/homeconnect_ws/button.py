@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from homeassistant.components.button import ButtonEntity
-from homeconnect_websocket.entities import Execution
+from homeassistant.exceptions import HomeAssistantError
 
 from .entity import HCEntity
-from .helpers import create_entities, error_decorator
+from .helpers import create_entities
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -28,12 +28,12 @@ async def async_setup_entry(
 ) -> None:
     """Set up button platform."""
     entities = create_entities(
-        {"button": HCButton, "start_button": HCStartButton}, config_entry.runtime_data
+        {"abort_button": HCAbortButton, "start_button": HCStartButton}, config_entry.runtime_data
     )
     async_add_entites(entities)
 
 
-class HCButton(HCEntity, ButtonEntity):
+class HCAbortButton(HCEntity, ButtonEntity):
     """Abort Button Entity."""
 
     _entity: Command
@@ -49,17 +49,8 @@ class HCStartButton(HCEntity, ButtonEntity):
     _entity: ActiveProgram
     entity_description: HCButtonEntityDescription
 
-    @property
-    def available(self) -> bool:
-        available = super().available
-        available &= self._runtime_data.appliance.selected_program is not None
-        if self._runtime_data.appliance.selected_program is not None:
-            available &= (
-                self._runtime_data.appliance.selected_program.execution
-                == Execution.SELECT_AND_START
-            )
-        return available
-
-    @error_decorator
     async def async_press(self) -> None:
-        await self._runtime_data.appliance.selected_program.start()
+        if self._appliance.selected_program is None:
+            msg = "No selected program"
+            raise HomeAssistantError(msg)
+        await self._appliance.selected_program.start()

@@ -14,7 +14,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from aiohttp import ClientConnectionError, ClientConnectorSSLError
 from homeassistant.components.file_upload import process_uploaded_file
-from homeassistant.config_entries import SOURCE_IGNORE, ConfigFlow
+from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import (
     CONF_DESCRIPTION,
     CONF_DEVICE,
@@ -170,19 +170,6 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
                 if "config_entry" in self.appliances:
                     _LOGGER.debug("Setting up form config entry")
                     self.data = self.appliances["config_entry"]
-                    if self.global_config:
-                        if self.global_config.override_host is not None:
-                            # Dev mode host override
-                            self.data[CONF_HOST] = self.global_config.override_host
-                            self.data[CONF_MANUAL_HOST] = True
-                            _LOGGER.info("Host override: %s", self.data[CONF_HOST])
-                        if self.global_config.override_psk is not None:
-                            # Dev mode psk override
-                            self.data[CONF_PSK] = self.global_config.override_psk
-                            self.data[CONF_MODE] = "TLS"
-                            self.data[CONF_AES_IV] = None
-                            _LOGGER.info("PSK override")
-
             except ParserError as exc:
                 return self.async_abort(
                     reason="profile_file_parser_error",
@@ -216,11 +203,9 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         appliance_options: list[SelectOptionDict] = []
         try:
             for appliance_id, appliance_info in self.appliances.items():
-                existing_entry = self.hass.config_entries.async_entry_for_domain_unique_id(
+                if not self.hass.config_entries.async_entry_for_domain_unique_id(
                     self.handler, appliance_id
-                )
-
-                if not existing_entry or existing_entry.source == SOURCE_IGNORE:
+                ):
                     brand = appliance_info["info"]["brand"]
                     appliance_type = appliance_info["info"]["type"]
                     vib = appliance_info["info"]["vib"]
@@ -354,13 +339,6 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             self.data[CONF_NAME] = (
                 f"{discovery_info.properties['brand']} {discovery_info.properties['type']}"
             )
-
-            self.context.update(
-                {
-                    "title_placeholders": {"name": discovery_info.name.split(".")[0]},
-                }
-            )
-
             return await self.async_step_upload()
         except KeyError:
             return self.async_abort(reason="invalid_discovery_info")
