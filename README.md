@@ -8,7 +8,7 @@ The **Home Connect Local** allows users to integrate their home appliances suppo
 
 2. Click the button bellow and click 'Download' to install the Integration:
 
-    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=homeconnect_local_hass&owner=chris-mc1)
+    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=homeconnect_local_hass&owner=ErikAnswer)
 
 3. Restart Home Assistant.
 
