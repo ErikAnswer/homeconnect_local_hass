@@ -55,13 +55,14 @@ class HCBinarySensor(HCEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
+        value = self._resolve_entity_value(self._entity)
         if self.entity_description.value_on:
-            if self._entity.value in self.entity_description.value_on:
+            if value in self.entity_description.value_on:
                 return True
-            if self._entity.value in self.entity_description.value_off:
+            if value in self.entity_description.value_off:
                 return False
             return None
-        return bool(self._entity.value)
+        return bool(value)
 
 
 class HCConnectionSensor(BinarySensorEntity):

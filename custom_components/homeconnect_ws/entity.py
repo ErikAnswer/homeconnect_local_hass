@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.helpers.entity import Entity
 
@@ -102,3 +102,28 @@ class HCEntity(Entity):
                     await asyncio.wait_for(self._appliance.session.connected_event.wait(), 10)
             self.async_write_ha_state()
             self._has_callback = False
+
+    @staticmethod
+    def _resolve_entity_value(entity: HcEntity) -> Any:
+        """Resolve enum-backed entities to their textual value."""
+        value = entity.value
+        entity_enum = getattr(entity, "enum", None)
+        if not entity_enum:
+            return value
+
+        if value in entity_enum.values():
+            return value
+
+        raw_candidates = [getattr(entity, "value_raw", None), value]
+        for candidate in raw_candidates:
+            if candidate is None:
+                continue
+
+            if candidate in entity_enum:
+                return entity_enum[candidate]
+
+            candidate_str = str(candidate)
+            if candidate_str in entity_enum:
+                return entity_enum[candidate_str]
+
+        return value

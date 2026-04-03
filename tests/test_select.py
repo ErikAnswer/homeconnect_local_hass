@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
+from custom_components.homeconnect_ws.entity_descriptions import HCSelectEntityDescription
+from custom_components.homeconnect_ws.select import HCSelect
 from homeassistant.components.select import (
     ATTR_OPTION,
     ATTR_OPTIONS,
@@ -237,3 +240,28 @@ async def test_select_program(
             },
         )
     )
+
+
+def test_current_option_resolves_raw_enum_values() -> None:
+    """Translated selects should not fall back to unknown for raw enum values."""
+    entity = Mock(
+        enum={"1": "Off", "2": "On"},
+        value=2,
+        value_raw=2,
+        name="BSH.Common.Setting.PowerState",
+    )
+    appliance = Mock(
+        info={"deviceID": "device-id"},
+        entities={"BSH.Common.Setting.PowerState": entity},
+    )
+    select = HCSelect(
+        HCSelectEntityDescription(
+            key="select_power_state",
+            entity="BSH.Common.Setting.PowerState",
+            has_state_translation=True,
+        ),
+        appliance,
+        Mock(),
+    )
+
+    assert select.current_option == "on"

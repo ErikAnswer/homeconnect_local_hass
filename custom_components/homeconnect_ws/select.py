@@ -70,13 +70,16 @@ class HCSelect(HCEntity, SelectEntity):
 
     @property
     def current_option(self) -> str:
+        value = self._resolve_entity_value(self._entity)
+        if value is None:
+            return None
         if self.entity_description.has_state_translation:
-            value = str(self._entity.value).lower()
-            if value in self._attr_options:
-                return value
-        value = str(self._entity.value)
-        if value in self._attr_options:
-            return value
+            translated_value = str(value).lower()
+            if translated_value in self._attr_options:
+                return translated_value
+        option = str(value)
+        if option in self._attr_options:
+            return option
         return None
 
     async def async_select_option(self, option: str) -> None:

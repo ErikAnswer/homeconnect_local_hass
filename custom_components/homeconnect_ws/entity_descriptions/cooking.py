@@ -75,16 +75,19 @@ def generate_hob_zones(appliance: HomeAppliance) -> EntityDescriptions:
     groups = get_groups_from_regex(appliance, pattern)
     descriptions = EntityDescriptions(sensor=[])
 
-    for group in sorted(groups, key=lambda value: int(value[0])):
+    for zone_index, group in enumerate(sorted(groups, key=lambda value: int(value[0])), start=1):
         zone = group[0]
+        translation_placeholders = {"group_name": str(zone_index)}
 
         entity = f"Cooking.Hob.Status.Zone.{zone}.State"
         if entity in appliance.entities:
             descriptions["sensor"].append(
                 HCSensorEntityDescription(
                     key=f"sensor_hob_zone_{zone}_state",
+                    translation_key="sensor_hob_zone_state",
+                    translation_placeholders=translation_placeholders,
                     entity=entity,
-                    has_state_translation=False,
+                    has_state_translation=True,
                 )
             )
 
@@ -93,8 +96,10 @@ def generate_hob_zones(appliance: HomeAppliance) -> EntityDescriptions:
             descriptions["sensor"].append(
                 HCSensorEntityDescription(
                     key=f"sensor_hob_zone_{zone}_power",
+                    translation_key="sensor_hob_zone_power_level",
+                    translation_placeholders=translation_placeholders,
                     entity=entity,
-                    has_state_translation=False,
+                    has_state_translation=True,
                 )
             )
 
@@ -103,9 +108,12 @@ def generate_hob_zones(appliance: HomeAppliance) -> EntityDescriptions:
             descriptions["sensor"].append(
                 HCSensorEntityDescription(
                     key=f"sensor_hob_zone_{zone}_current_temperature",
+                    translation_key="sensor_hob_zone_current_temperature",
+                    translation_placeholders=translation_placeholders,
                     entity=entity,
                     device_class=SensorDeviceClass.TEMPERATURE,
                     native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                    entity_registry_enabled_default=False,
                 )
             )
 
@@ -114,6 +122,8 @@ def generate_hob_zones(appliance: HomeAppliance) -> EntityDescriptions:
             descriptions["sensor"].append(
                 HCSensorEntityDescription(
                     key=f"sensor_hob_zone_{zone}_heatup_progress",
+                    translation_key="sensor_hob_zone_heatup_progress",
+                    translation_placeholders=translation_placeholders,
                     entity=entity,
                     native_unit_of_measurement=PERCENTAGE,
                 )

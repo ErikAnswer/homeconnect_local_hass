@@ -16,6 +16,7 @@ from custom_components.homeconnect_ws.entity_descriptions.common import (
     generate_power_switch,
     generate_program,
 )
+from custom_components.homeconnect_ws.entity_descriptions.cooking import generate_hob_zones
 from custom_components.homeconnect_ws.helpers import merge_dicts
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.switch import SwitchDeviceClass
@@ -115,6 +116,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
         device_class=SwitchDeviceClass.SWITCH,
         value_mapping=("On", "Off"),
     )
+    assert "select" not in switch_description
 
     # No Switch
     device_description["setting"][0]["min"] = 0
@@ -123,6 +125,12 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
     switch_description = generate_power_switch(appliance)
 
     assert "switch" not in switch_description
+    assert switch_description["select"][0] == HCSelectEntityDescription(
+        key="select_power_state",
+        entity="BSH.Common.Setting.PowerState",
+        options=["mainsoff", "off", "on", "standby"],
+        has_state_translation=True,
+    )
 
     # On/MainsOff Switch
     device_description["setting"][0]["enumeration"] = {"0": "MainsOff", "2": "On"}
@@ -216,3 +224,90 @@ async def test_program(mock_homeconnect_appliance: MockApplianceType) -> None:
     )
 
     appliance = await mock_homeconnect_appliance(description={})
+
+
+async def test_program_not_created_for_hob(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """Skip common program controls for hobs."""
+    appliance = await mock_homeconnect_appliance(description=PROGRAM)
+    appliance.info["type"] = "Hob"
+
+    assert generate_program(appliance) == {}
+
+
+HOB_ZONES = DeviceDescription(
+    status=[
+        EntityDescription(
+            uid=1200,
+            name="Cooking.Hob.Status.Zone.120.State",
+            access=Access.READ,
+            available=True,
+            enumeration={"0": "Off", "1": "Active"},
+        ),
+        EntityDescription(
+            uid=1201,
+            name="Cooking.Hob.Status.Zone.120.PowerLevel",
+            access=Access.READ,
+            available=True,
+            enumeration={"0": "Off", "50": "50"},
+        ),
+        EntityDescription(
+            uid=1202,
+            name="Cooking.Hob.Status.Zone.120.CurrentTemperature",
+            access=Access.READ,
+            available=True,
+        ),
+        EntityDescription(
+            uid=1203,
+            name="Cooking.Hob.Status.Zone.120.HeatupProgress",
+            access=Access.READ,
+            available=True,
+        ),
+        EntityDescription(
+            uid=1210,
+            name="Cooking.Hob.Status.Zone.121.State",
+            access=Access.READ,
+            available=True,
+            enumeration={"0": "Off", "1": "Active"},
+        ),
+    ]
+)
+
+
+async def test_generate_hob_zones(mock_homeconnect_appliance: MockApplianceType) -> None:
+    """Dynamic hob zones should use translated names and stable per-zone numbering."""
+    appliance = await mock_homeconnect_appliance(description=HOB_ZONES)
+    descriptions = generate_hob_zones(appliance)
+    descriptions_by_key = {description.key: description for description in descriptions["sensor"]}
+
+    assert descriptions_by_key["sensor_hob_zone_120_state"] == HCSensorEntityDescription(
+        key="sensor_hob_zone_120_state",
+        translation_key="sensor_hob_zone_state",
+        translation_placeholders={"group_name": "1"},
+        entity="Cooking.Hob.Status.Zone.120.State",
+        has_state_translation=True,
+    )
+    assert descriptions_by_key["sensor_hob_zone_120_power"] == HCSensorEntityDescription(
+        key="sensor_hob_zone_120_power",
+        translation_key="sensor_hob_zone_power_level",
+        translation_placeholders={"group_name": "1"},
+        entity="Cooking.Hob.Status.Zone.120.PowerLevel",
+        has_state_translation=True,
+    )
+    assert descriptions_by_key["sensor_hob_zone_120_current_temperature"] == HCSensorEntityDescription(
+        key="sensor_hob_zone_120_current_temperature",
+        translation_key="sensor_hob_zone_current_temperature",
+        translation_placeholders={"group_name": "1"},
+        entity="Cooking.Hob.Status.Zone.120.CurrentTemperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        native_unit_of_measurement="°C",
+        entity_registry_enabled_default=False,
+    )
+    assert descriptions_by_key["sensor_hob_zone_121_state"] == HCSensorEntityDescription(
+        key="sensor_hob_zone_121_state",
+        translation_key="sensor_hob_zone_state",
+        translation_placeholders={"group_name": "2"},
+        entity="Cooking.Hob.Status.Zone.121.State",
+        has_state_translation=True,
+    )

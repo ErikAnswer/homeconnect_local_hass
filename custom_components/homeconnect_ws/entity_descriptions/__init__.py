@@ -48,6 +48,7 @@ def get_all_entity_description() -> _EntityDescriptionsDefinitionsType:
 
 def get_available_entities(appliance: HomeAppliance) -> EntityDescriptions:
     """Get all available Entity descriptions."""
+    appliance_type = appliance.info.get("type") if appliance.info else None
     available_entities: _EntityDescriptionsType = {
         "abort_button": [],
         "active_program": [],
@@ -74,6 +75,11 @@ def get_available_entities(appliance: HomeAppliance) -> EntityDescriptions:
                 if dynamic_description := description(appliance):
                     available_entities[description_type].append(dynamic_description)
             else:
+                if (
+                    description.excluded_appliance_types is not None
+                    and appliance_type in description.excluded_appliance_types
+                ):
+                    continue
                 all_subscribed_entities = set()
                 if description.entity:
                     all_subscribed_entities.add(description.entity)

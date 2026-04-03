@@ -1,6 +1,6 @@
 # home_connect_local_ha
 
-The **home_connect_local_ha** allows users to integrate their home appliances supporting the  [Home Connect](https://www.home-connect.com/global) standard for Bosch and Siemens using direct communication over the local network.
+The **home_connect_local_ha** allows users to integrate their home appliances supporting the [Home Connect](https://www.home-connect.com/global) standard for Bosch and Siemens using direct communication over the local network.
 
 ## Install the Integration
 
@@ -8,7 +8,7 @@ The **home_connect_local_ha** allows users to integrate their home appliances su
 
 2. Click the button bellow and click 'Download' to install the Integration:
 
-    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=home_connect_local_ha&owner=ErikAnswer)
+   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=home_connect_local_ha&owner=ErikAnswer)
 
 3. Restart Home Assistant.
 
@@ -21,7 +21,7 @@ To use this integration, you must first create a Home Connect account and connec
 1. Use the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) to download your Appliance profiles, select "openHAB" as target. The downloaded ZIP-file contains each Appliance encryption Key and feature descriptions
 2. Click the button below or use "Add Integration" in Home Assistant and select "home_connect_local_ha".
 
-    [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=homeconnect_ws)
+   [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=homeconnect_ws)
 
 3. Upload the downloaded Profile file.
 4. Select the Appliance you want to setup.
@@ -51,28 +51,28 @@ This integration follows standard integration removal, no extra steps are requir
 Use one of these two methods enable debug logging:
 
 - Through the UI:
-    1. [Enable Debug logging](<https://www.home-assistant.io/docs/configuration/troubleshooting>) on the detail page of the integration
-    2. Reload the config entry
-    3. Perform the actions that lead to an error
-    4. [Disable Debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#disable-debug-logging-and-download-logs) on the detail page of the integration
+  1. [Enable Debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting) on the detail page of the integration
+  2. Reload the config entry
+  3. Perform the actions that lead to an error
+  4. [Disable Debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#disable-debug-logging-and-download-logs) on the detail page of the integration
 
 - OR -
 
 - Through configuration.yaml:
-    1. Add the following to your [configuration.yaml](https://www.home-assistant.io/docs/configuration/) file:
+  1. Add the following to your [configuration.yaml](https://www.home-assistant.io/docs/configuration/) file:
 
-        ```yaml
-        logger:
-        logs:
-            custom_components.homeconnect_ws: debug # home_connect_local_ha Integration
-            homeconnect_ws: debug
-            homeconnect_websocket: debug # Homeconnect websocket Python package
-        ```
+     ```yaml
+     logger:
+     logs:
+       custom_components.homeconnect_ws: debug # home_connect_local_ha Integration
+       homeconnect_ws: debug
+       homeconnect_websocket: debug # Homeconnect websocket Python package
+     ```
 
-    2. Restart Home Assistant
-    3. Perform the actions that lead to an error
-    4. Click the button below or navigate to "Settings" -> "Logs".
+  2. Restart Home Assistant
+  3. Perform the actions that lead to an error
+  4. Click the button below or navigate to "Settings" -> "Logs".
 
-        [![Open your Home Assistant instance and show your Home Assistant logs.](https://my.home-assistant.io/badges/logs.svg)](https://my.home-assistant.io/redirect/logs/?)
+     [![Open your Home Assistant instance and show your Home Assistant logs.](https://my.home-assistant.io/badges/logs.svg)](https://my.home-assistant.io/redirect/logs/?)
 
-    5. Download the log file using download button on the left
+  5. Download the log file using download button on the left

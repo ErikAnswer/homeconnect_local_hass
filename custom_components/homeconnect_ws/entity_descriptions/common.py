@@ -44,6 +44,8 @@ POWER_SWITCH_VALUE_MAPINGS = (
     ("Standby", "Off"),
 )
 
+PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES = ("Hob", "Hood")
+
 
 def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
     """Get Power switch description."""
@@ -71,16 +73,15 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
                         )
                     ]
 
-        entity_descriptions["select"] = [
-            HCSelectEntityDescription(
-                key="select_power_state",
-                entity="BSH.Common.Setting.PowerState",
-                options=[value.lower() for value in settable_states],
-                has_state_translation=True,
-                # more then two power states
-                entity_registry_enabled_default=len(settable_states) > 2,
-            )
-        ]
+        if len(settable_states) > 2:
+            entity_descriptions["select"] = [
+                HCSelectEntityDescription(
+                    key="select_power_state",
+                    entity="BSH.Common.Setting.PowerState",
+                    options=[value.lower() for value in settable_states],
+                    has_state_translation=True,
+                )
+            ]
     return entity_descriptions
 
 
@@ -99,6 +100,9 @@ def generate_door_state(appliance: HomeAppliance) -> HCSensorEntityDescription |
 
 def generate_program(appliance: HomeAppliance) -> EntityDescriptions:
     """Get Door program select and sensor description."""
+    if appliance.info and appliance.info.get("type") in PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES:
+        return EntityDescriptions()
+
     pattern = re.compile(r"^BSH\.Common\.Program\.Favorite\.(.*)$")
 
     programs = {}
@@ -150,6 +154,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCButtonEntityDescription(
             key="button_abort_program",
             entity="BSH.Common.Command.AbortProgram",
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         )
     ],
     "binary_sensor": [
@@ -214,6 +219,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SensorDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             suggested_unit_of_measurement=UnitOfTime.HOURS,
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
             extra_attributes=[
                 {
                     "name": "Is Estimated",
@@ -225,6 +231,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="sensor_program_progress",
             entity="BSH.Common.Option.ProgramProgress",
             native_unit_of_measurement=PERCENTAGE,
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         ),
         HCSensorEntityDescription(
             key="sensor_water_forecast",
@@ -249,6 +256,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SensorDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             suggested_unit_of_measurement=UnitOfTime.HOURS,
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         ),
         HCSensorEntityDescription(
             key="sensor_count_started",
@@ -302,6 +310,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SensorDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             suggested_unit_of_measurement=UnitOfTime.HOURS,
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         ),
         HCSensorEntityDescription(
             key="sensor_wifi_signal_strength",
@@ -317,6 +326,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCButtonEntityDescription(
             key="button_start_program",
             entity="BSH.Common.Root.ActiveProgram",
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         )
     ],
     "switch": [
@@ -333,6 +343,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=NumberDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             mode=NumberMode.AUTO,
+            excluded_appliance_types=PROGRAM_UI_EXCLUDED_APPLIANCE_TYPES,
         ),
     ],
     "dynamic": [generate_power_switch, generate_program],

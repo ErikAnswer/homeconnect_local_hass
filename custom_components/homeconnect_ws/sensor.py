@@ -59,11 +59,12 @@ class HCSensor(HCEntity, SensorEntity):
 
     @property
     def native_value(self) -> int | float | str:
-        if self._entity.value is None:
+        value = self._resolve_entity_value(self._entity)
+        if value is None:
             return None
         if self._entity.enum and self.entity_description.has_state_translation:
-            return str(self._entity.value).lower()
-        return self._entity.value
+            return str(value).lower()
+        return value
 
 
 class HCEventSensor(HCEntity, SensorEntity):
@@ -75,8 +76,9 @@ class HCEventSensor(HCEntity, SensorEntity):
     def native_value(self) -> str:
         if self.entity_description.options:
             for entity, value in zip(self._entities, self.entity_description.options, strict=False):
-                if (entity.enum is not None and entity.value in {"Present", "Confirmed"}) or (
-                    entity.enum is None and bool(entity.value)
+                entity_value = self._resolve_entity_value(entity)
+                if (entity.enum is not None and entity_value in {"Present", "Confirmed"}) or (
+                    entity.enum is None and bool(entity_value)
                 ):
                     return value
         return self.entity_description.options[-1]
