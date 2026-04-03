@@ -1,6 +1,6 @@
 {
   "domain": "homeconnect_ws",
-  "name": "Home Connect Local",
+  "name": "home_connect_local_ha",
   "after_dependencies": [
     "file_upload"
   ],
@@ -8,10 +8,10 @@
     "@ErikAnswer"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/ErikAnswer/homeconnect_local_hass",
+  "documentation": "https://github.com/ErikAnswer/home_connect_local_ha",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/ErikAnswer/homeconnect_local_hass/issues",
+  "issue_tracker": "https://github.com/ErikAnswer/home_connect_local_ha/issues",
   "loggers": [
     "custom_components.homeconnect_ws",
     "homeconnect_websocket"

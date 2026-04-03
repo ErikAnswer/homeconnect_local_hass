@@ -1,6 +1,6 @@
-# Home Connect Local
+# home_connect_local_ha
 
-The **Home Connect Local** allows users to integrate their home appliances supporting the  [Home Connect](https://www.home-connect.com/global) standard for Bosch and Siemens using direct communication over the local network.
+The **home_connect_local_ha** allows users to integrate their home appliances supporting the  [Home Connect](https://www.home-connect.com/global) standard for Bosch and Siemens using direct communication over the local network.
 
 ## Install the Integration
 
@@ -8,7 +8,7 @@ The **Home Connect Local** allows users to integrate their home appliances suppo
 
 2. Click the button bellow and click 'Download' to install the Integration:
 
-    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=homeconnect_local_hass&owner=ErikAnswer)
+    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?repository=home_connect_local_ha&owner=ErikAnswer)
 
 3. Restart Home Assistant.
 
@@ -19,7 +19,7 @@ To use this integration, you must first create a Home Connect account and connec
 ## Setup
 
 1. Use the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) to download your Appliance profiles, select "openHAB" as target. The downloaded ZIP-file contains each Appliance encryption Key and feature descriptions
-2. Click the button below or use "Add Integration" in Home Assistant and select "Home Connect Local".
+2. Click the button below or use "Add Integration" in Home Assistant and select "home_connect_local_ha".
 
     [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=homeconnect_ws)
 
@@ -64,7 +64,7 @@ Use one of these two methods enable debug logging:
         ```yaml
         logger:
         logs:
-            custom_components.homeconnect_ws: debug # Home Connect Local Integration
+            custom_components.homeconnect_ws: debug # home_connect_local_ha Integration
             homeconnect_ws: debug
             homeconnect_websocket: debug # Homeconnect websocket Python package
         ```

@@ -21,9 +21,9 @@ body:
       label: Before submitting a Feature request, please follow these steps
       description: Please confirm that you have completed the following steps
       options:
-        - label: The requested feature is not latest beta release of Home Connect Local.
+        - label: The requested feature is not latest beta release of home_connect_local_ha.
         - label: The requested feature is available through the HomeConnect App.
-        - label: I have checked the [open issues](https://github.com/ErikAnswer/homeconnect_local_hass/issues) to ensure my issue isn't a duplicate.
+        - label: I have checked the [open issues](https://github.com/ErikAnswer/home_connect_local_ha/issues) to ensure my issue isn't a duplicate.
     validations:
       required: true
 
